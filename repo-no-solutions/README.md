@@ -9,7 +9,7 @@ SPDX-License-Identifier: CC-BY-4.0
 Unsolved-stub copy of the exercises graded by `eval-harness`
 (`../run_eval.py`), trimmed to only the 22 exercise directories the harness
 actually grades. Sourced from the
-[portable-gpu-programming](https://github.com/anni-moisala/portable-gpu-programming)
+[portable-gpu-programming](https://github.com/csc-training/portable-gpu-programming)
 training material repository (CSC – IT Center for Science); each exercise's
 own `README.md` carries its task instructions. See `COPYING` and `LICENSES/`
 for licensing.
