@@ -1,8 +1,8 @@
 # eval-harness
 
-Grading harness for gradeable exercises in CSC's
+Grading harness for selectable exercises in CSC's
 [Portable GPU Programming](https://github.com/csc-training/portable-gpu-programming)
-training material — built to grade coding agents on HPC coding tasks in cpp, Kokkos and OpenMP.
+training material — built to grade coding agents on HPC coding tasks including C++, Kokkos and OpenMP.
 
 For each registered exercise it builds candidate source against a reference,
 runs the resulting binary on Roihu (via Slurm), and checks the output/source
