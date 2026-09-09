@@ -26,6 +26,23 @@ against known-good criteria, split into two tiers:
 - `repo-no-solutions/` — the 22 registered exercises' unsolved stubs, trimmed
   from the training repo to just what's gradable (see its own README).
 
+## Prerequisites
+
+You do **not** need to clone the
+[portable-gpu-programming](https://github.com/anni-moisala/portable-gpu-programming)
+training repo just to grade a candidate's attempt (`run_eval.py <repo-root>`
+or `run_eval.py <exercise_id> <candidate-dir>`) — `repo-no-solutions/` already
+carries everything those need.
+
+You only need a local clone of it, at the path `EVAL_HARNESS_REPO_ROOT` points
+to (see below), for:
+
+- `run_eval.py --self-test` — the harness's own acceptance test, and
+- `run_eval.py <exercise_id> solution|stub` — grading against the official
+  reference solution/stub directly.
+
+Both pull the reference solution and pristine stub content from that repo.
+
 ## Usage
 
 ```
@@ -35,20 +52,42 @@ python3 run_eval.py <exercise_id> <candidate-dir>     # grade one exercise again
 python3 run_eval.py <repo-root>                       # sweep every exercise against <repo-root>/<exercise-path>
 ```
 
-To grade an agent's attempt: point it at `repo-no-solutions/`, then run
-`python3 run_eval.py repo-no-solutions` (or grade one exercise at a time)
-once it's done.
+To grade an agent's attempt:
 
-## Before this runs anywhere else
+1. **Copy `repo-no-solutions/` somewhere else first** — don't hand the agent
+   the original. Grading re-copies whatever files it finds into a scratch
+   workdir, so nothing here is destroyed by grading itself, but the agent
+   will edit these files in place, and you want `repo-no-solutions/` to stay
+   a clean starting point for the next attempt/agent:
 
-`lib.py` hardcodes this environment's absolute paths and Slurm account —
-none of it is a secret, but it won't run elsewhere without editing:
+   ```
+   cp -r repo-no-solutions my-agent-attempt
+   ```
 
-- `REPO_ROOT`, `RUNS_ROOT`, `KOKKOS_ROOT_CUDA` — absolute paths under this
-  user's `/scratch`.
-- `MPICXX`, `MPICC` — this cluster's specific MPI install path.
-- `SRUN_ACCOUNT` — the Slurm account to bill jobs to.
-- `SRUN_CPU_PARTITION`/`SRUN_GPU_PARTITION` — Roihu's CPU racks are x86_64
-  while the GPU racks (and this harness's own compilers) are aarch64, so
-  `run_nvhpc_local` deliberately requests a GPU-partition node even for a
-  CPU-only build; see the comment in `lib.py` before changing this.
+2. Point the agent at `my-agent-attempt/` and let it work through each
+   exercise's own `README.md`.
+3. Grade the result: `python3 run_eval.py my-agent-attempt` (sweeps every
+   exercise), or one at a time with
+   `python3 run_eval.py <exercise_id> my-agent-attempt/<exercise-path>`.
+
+## Configuration
+
+`lib.py`'s cluster/account/path config reads from environment variables,
+falling back to this environment's own values if unset — so it runs
+unmodified here, and elsewhere by exporting overrides instead of editing
+the source:
+
+| Variable | Default | What it is |
+|---|---|---|
+| `EVAL_HARNESS_REPO_ROOT` | `/scratch/dac/amoisala/portable-gpu-programming` | Clone of the training repo (see Prerequisites) |
+| `EVAL_HARNESS_RUNS_ROOT` | `/scratch/dac/amoisala/eval-harness-runs` | Scratch dir grading builds/runs happen in |
+| `EVAL_HARNESS_KOKKOS_ROOT_CUDA` | `/scratch/dac/amoisala/kokkos/kokkos-cuda` | Kokkos CUDA-backend install used by `cmake_build_cuda`/`nvcc_wrapper` |
+| `EVAL_HARNESS_MPICXX` / `EVAL_HARNESS_MPICC` | this cluster's spack install path | MPI C++/C compiler wrappers |
+| `EVAL_HARNESS_SRUN_ACCOUNT` | `dac` | Slurm account jobs are billed to |
+| `EVAL_HARNESS_SRUN_GPU_PARTITION` | `gputest` | Slurm partition every build/run job actually lands on |
+
+One partition is deliberately **not** configurable: `SRUN_CPU_PARTITION`
+(`"small"`) is Roihu's x86_64 CPU-only partition, incompatible with every
+binary this harness builds (all aarch64, matching the login node) — see the
+comment on it and on `run_nvhpc_local` in `lib.py` before ever pointing
+anything at it again.

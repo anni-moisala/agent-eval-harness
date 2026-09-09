@@ -19,23 +19,33 @@ import re
 import shutil
 import subprocess
 
-REPO_ROOT = "/scratch/dac/amoisala/portable-gpu-programming"
-RUNS_ROOT = "/scratch/dac/amoisala/eval-harness-runs"
+# All of the below are this environment's own paths/account -- override via
+# env var for a different user/cluster (see README.md).
+REPO_ROOT = os.environ.get("EVAL_HARNESS_REPO_ROOT",
+                            "/scratch/dac/amoisala/portable-gpu-programming")
+RUNS_ROOT = os.environ.get("EVAL_HARNESS_RUNS_ROOT",
+                            "/scratch/dac/amoisala/eval-harness-runs")
 
-KOKKOS_ROOT_CUDA = "/scratch/dac/amoisala/kokkos/kokkos-cuda"
+KOKKOS_ROOT_CUDA = os.environ.get("EVAL_HARNESS_KOKKOS_ROOT_CUDA",
+                                   "/scratch/dac/amoisala/kokkos/kokkos-cuda")
 NVCC_WRAPPER = os.path.join(KOKKOS_ROOT_CUDA, "bin", "nvcc_wrapper")
 
-MPICXX = "/appl/soft/spack/core/v2026_03/aarch64/g14cu129_eg/install_dir/neoverse_v2/gcc-14.3.0/openmpi-5.0.10-hrdnxd/bin/mpicxx"
-MPICC = "/appl/soft/spack/core/v2026_03/aarch64/g14cu129_eg/install_dir/neoverse_v2/gcc-14.3.0/openmpi-5.0.10-hrdnxd/bin/mpicc"
+MPICXX = os.environ.get(
+    "EVAL_HARNESS_MPICXX",
+    "/appl/soft/spack/core/v2026_03/aarch64/g14cu129_eg/install_dir/neoverse_v2/gcc-14.3.0/openmpi-5.0.10-hrdnxd/bin/mpicxx")
+MPICC = os.environ.get(
+    "EVAL_HARNESS_MPICC",
+    "/appl/soft/spack/core/v2026_03/aarch64/g14cu129_eg/install_dir/neoverse_v2/gcc-14.3.0/openmpi-5.0.10-hrdnxd/bin/mpicc")
 
-SRUN_ACCOUNT = "dac"
+SRUN_ACCOUNT = os.environ.get("EVAL_HARNESS_SRUN_ACCOUNT", "dac")
 SRUN_CPU_PARTITION = "small"      # x86_64 nodes -- NOT usable for this harness's
                                    # binaries: nvc/g++/mpicc all target aarch64
                                    # (the login node's arch), and this cluster's
                                    # only aarch64 hardware is the GPU racks. Kept
                                    # only as srun_run's gpu=False default; nothing
                                    # calls it (see run_nvhpc_local's comment).
-SRUN_GPU_PARTITION = "gputest"  # fast dedicated test nodes -- see note in srun_run
+SRUN_GPU_PARTITION = os.environ.get("EVAL_HARNESS_SRUN_GPU_PARTITION", "gputest")
+                                # fast dedicated test nodes -- see note in srun_run
 SRUN_CPUS_PER_TASK = 4            # matches run_roihu.sh's --cpus-per-task=4
 SRUN_DEFAULT_SLURM_TIME = "00:10:00"  # matches run_roihu.sh's --time=00:10:00
 
