@@ -1,6 +1,6 @@
 # eval-harness
 
-Grading harness for selectable exercises in CSC's
+Grading harness for exercises in CSC's
 [Portable GPU Programming](https://github.com/csc-training/portable-gpu-programming)
 training material — built to grade coding agents on HPC coding tasks including C++, Kokkos and OpenMP.
 
@@ -25,29 +25,9 @@ against known-good criteria, split into two tiers:
 - `repo-no-solutions/` — the 22 registered exercises' unsolved stubs, trimmed
   from the training repo to just what's gradable (see its own README).
 
-## Prerequisites
-
-You do **not** need to clone the
-[portable-gpu-programming](https://github.com/csc-training/portable-gpu-programming)
-training repo just to grade a candidate's attempt (`run_eval.py <repo-root>`
-or `run_eval.py <exercise_id> <candidate-dir>`) — `repo-no-solutions/` already
-carries everything those need.
-
-You only need a local clone of it, at the path `EVAL_HARNESS_REPO_ROOT` points
-to (see below), for debugging the harness itself, not for grading:
-
-- `run_eval.py --self-test` — the harness's own acceptance test, and
-- `run_eval.py <exercise_id> solution|stub` — checking one exercise's
-  build/run/grade logic against its known-good solution or stub, without
-  running the full self-test.
-
-Both pull the reference solution and pristine stub content from that repo.
-
 ## Usage
 
 ```
-python3 run_eval.py --self-test                      # debugging: harness's own acceptance test
-python3 run_eval.py <exercise_id> solution|stub       # debugging: one exercise's known solution/stub
 python3 run_eval.py <exercise_id> <candidate-dir>     # grade one exercise against an arbitrary directory
 python3 run_eval.py <repo-root>                       # sweep every exercise against <repo-root>/<exercise-path>
 ```
@@ -103,9 +83,22 @@ the source:
 
 | Variable | Default | What it is |
 |---|---|---|
-| `EVAL_HARNESS_REPO_ROOT` | `/scratch/dac/amoisala/portable-gpu-programming` | Clone of the training repo (see Prerequisites) |
+| `EVAL_HARNESS_REPO_ROOT` | `/scratch/dac/amoisala/portable-gpu-programming` | Clone of the training repo (see Debugging the harness) |
 | `EVAL_HARNESS_RUNS_ROOT` | `/scratch/dac/amoisala/eval-harness-runs` | Scratch dir grading builds/runs happen in |
 | `EVAL_HARNESS_KOKKOS_ROOT_CUDA` | `/scratch/dac/amoisala/kokkos/kokkos-cuda` | Kokkos CUDA-backend install used by `cmake_build_cuda`/`nvcc_wrapper` |
 | `EVAL_HARNESS_MPICXX` / `EVAL_HARNESS_MPICC` | this cluster's spack install path | MPI C++/C compiler wrappers |
 | `EVAL_HARNESS_SRUN_ACCOUNT` | `dac` | Slurm account jobs are billed to |
 | `EVAL_HARNESS_SRUN_GPU_PARTITION` | `gputest` | Slurm partition every build/run job actually lands on |
+
+## Debugging the harness
+
+Grading an agent's attempt (above) never needs a local clone of the training
+repo — `repo-no-solutions/` already carries everything for that. A clone,
+at the path `EVAL_HARNESS_REPO_ROOT` points to, is only needed to check the
+harness's *own* build/run/grade logic against the training repo's official
+reference solution/stub, rather than grading a candidate:
+
+```
+python3 run_eval.py --self-test                 # harness's own acceptance test
+python3 run_eval.py <exercise_id> solution|stub  # one exercise's known solution/stub
+```
