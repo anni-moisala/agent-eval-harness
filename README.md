@@ -1,4 +1,4 @@
-# eval-harness
+# Agent eval harness
 
 Grading harness for exercises in CSC's
 [Portable GPU Programming](https://github.com/csc-training/portable-gpu-programming)
