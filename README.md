@@ -2,7 +2,7 @@
 
 Grading harness for exercises in CSC's
 [Portable GPU Programming](https://github.com/csc-training/portable-gpu-programming)
-training material — built to grade coding agents on HPC coding tasks including C++, Kokkos and OpenMP.
+training material — built to grade coding agents on HPC coding tasks including C++, Kokkos, and OpenMP.
 
 For each registered exercise it builds candidate source against a reference,
 runs the resulting binary on Roihu (via Slurm), and checks the output/source
