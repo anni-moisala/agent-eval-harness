@@ -10,7 +10,7 @@ _EXPECTED = {
     "Top boundary": -18,
     "Bottom boundary": -36,
     "Left boundary": -90,
-    "Rigth boundary": -108,  # typo is in the actual solution output, preserved on purpose
+    "Right boundary": -108,
 }
 
 

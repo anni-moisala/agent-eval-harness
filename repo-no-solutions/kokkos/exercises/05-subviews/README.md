@@ -12,4 +12,12 @@ a single 2D array. Your tasks are following:
 1. Create subviews for the boundaries (top,  bottom, left, right), and initialize
 the boundaries with the hel pof subviews using a `parallel_for`.
 2. Copy the boundary data to the host. For this, you need contiguous buffers on the device (copying data between non-contiguous views is possible only within the same execution space), and their mirror views on the host.
-3. Print out the boundary values on the host.
+3. Print out the boundary values on the host: for each boundary, sum its values and
+print one line as `<label> <sum>`, using exactly these labels:
+
+   ```
+   Top boundary <sum>
+   Bottom boundary <sum>
+   Left boundary <sum>
+   Right boundary <sum>
+   ```
