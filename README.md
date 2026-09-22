@@ -13,6 +13,25 @@ The harness evaluates each exercise in two tiers:
 
 Tier B is needed because an unmodified stub can sometimes produce the correct answer without implementing the intended parallel construct.
 
+## Configuration
+
+This harness only targets Roihu, so its toolchain paths are hardcoded. Only
+one setting is required; the rest have working defaults:
+
+| Variable | Required? | Default | Description |
+|---|---|---|---|
+| `ACCOUNT` | **yes** | none | Slurm account jobs are billed to |
+| `EVAL_HARNESS_RUNS_ROOT` | no | `./eval-harness-runs` (relative to cwd) | Scratch directory for builds/runs |
+| `EVAL_HARNESS_KOKKOS_ROOT_CUDA` | no | `$KOKKOS_INSTROOT` if set (i.e. after `module load kokkos`), else a fallback build | Kokkos CUDA installation |
+| `EVAL_HARNESS_SRUN_GPU_PARTITION` | no | `gputest` | Slurm GPU partition |
+
+So the only setup step is:
+
+```
+export ACCOUNT=<your Slurm account>
+module load kokkos   # so Kokkos exercises build without a manual install
+```
+
 ## Quick start
 
 1. **Create a clean copy**
@@ -86,32 +105,18 @@ exercises/           # grading logic for each exercise
 repo-no-solutions/   # clean, unsolved exercise set
 ```
 
-## Configuration
-
-Cluster-specific settings can be overridden with environment variables:
-
-| Variable | Default | Description |
-|---|---|---|
-| `EVAL_HARNESS_REPO_ROOT` | `/scratch/dac/amoisala/portable-gpu-programming` | Training repo clone, used for self-testing |
-| `EVAL_HARNESS_RUNS_ROOT` | `/scratch/dac/amoisala/eval-harness-runs` | Scratch directory for builds/runs |
-| `EVAL_HARNESS_KOKKOS_ROOT_CUDA` | `/scratch/dac/amoisala/kokkos/kokkos-cuda` | Kokkos CUDA installation |
-| `EVAL_HARNESS_MPICXX` / `EVAL_HARNESS_MPICC` | cluster-specific | MPI compiler wrappers |
-| `EVAL_HARNESS_SRUN_ACCOUNT` | `dac` | Slurm account |
-| `EVAL_HARNESS_SRUN_GPU_PARTITION` | `gputest` | Slurm GPU partition |
-
 ## Self-testing the harness
 
-To test the harness itself, copy the original training repository with solutions to `EVAL_HARNESS_REPO_ROOT` and run:
+To test the harness itself, pass `--repo-root` pointing at a clone of the
+*original* training repository (with solutions, unlike `repo-no-solutions/`):
 
 ```
-python3 run_eval.py --self-test
+python3 run_eval.py --self-test --repo-root /path/to/portable-gpu-programming
 ```
 
 Or compare an individual exercise against its known solution or stub:
 
 ```
-python3 run_eval.py <exercise_id> solution
-python3 run_eval.py <exercise_id> stub
+python3 run_eval.py <exercise_id> solution --repo-root /path/to/portable-gpu-programming
+python3 run_eval.py <exercise_id> stub --repo-root /path/to/portable-gpu-programming
 ```
-
-These commands use the clone configured by `EVAL_HARNESS_REPO_ROOT`.

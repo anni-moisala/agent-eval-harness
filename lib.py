@@ -19,25 +19,29 @@ import re
 import shutil
 import subprocess
 
-# All of the below are this environment's own paths/account -- override via
-# env var for a different user/cluster (see README.md).
-REPO_ROOT = os.environ.get("EVAL_HARNESS_REPO_ROOT",
-                            "/scratch/dac/amoisala/portable-gpu-programming")
+# This harness only targets Roihu, so the toolchain paths below are hardcoded
+# for this cluster rather than configurable per-cluster. What's still meant
+# to vary per user is: SRUN_ACCOUNT (required, no sane default), REPO_ROOT
+# (a --repo-root CLI flag, see run_eval.py -- only self-test/solution/stub
+# need it), and RUNS_ROOT/KOKKOS_ROOT_CUDA (env-overridable, but with
+# defaults that should just work without any setup).
+REPO_ROOT = "/scratch/dac/amoisala/portable-gpu-programming"
 RUNS_ROOT = os.environ.get("EVAL_HARNESS_RUNS_ROOT",
-                            "/scratch/dac/amoisala/eval-harness-runs")
+                            os.path.join(os.getcwd(), "eval-harness-runs"))
 
-KOKKOS_ROOT_CUDA = os.environ.get("EVAL_HARNESS_KOKKOS_ROOT_CUDA",
-                                   "/scratch/dac/amoisala/kokkos/kokkos-cuda")
+# `module load kokkos` sets KOKKOS_INSTROOT to a ready-made Kokkos-CUDA
+# install (bin/nvcc_wrapper + lib64/cmake/Kokkos/KokkosConfig.cmake) --
+# no per-user Kokkos build needed. EVAL_HARNESS_KOKKOS_ROOT_CUDA still wins
+# if set, for anyone who does want their own build.
+KOKKOS_ROOT_CUDA = (os.environ.get("EVAL_HARNESS_KOKKOS_ROOT_CUDA")
+                     or os.environ.get("KOKKOS_INSTROOT")
+                     or "/scratch/dac/amoisala/kokkos/kokkos-cuda")
 NVCC_WRAPPER = os.path.join(KOKKOS_ROOT_CUDA, "bin", "nvcc_wrapper")
 
-MPICXX = os.environ.get(
-    "EVAL_HARNESS_MPICXX",
-    "/appl/soft/spack/core/v2026_03/aarch64/g14cu129_eg/install_dir/neoverse_v2/gcc-14.3.0/openmpi-5.0.10-hrdnxd/bin/mpicxx")
-MPICC = os.environ.get(
-    "EVAL_HARNESS_MPICC",
-    "/appl/soft/spack/core/v2026_03/aarch64/g14cu129_eg/install_dir/neoverse_v2/gcc-14.3.0/openmpi-5.0.10-hrdnxd/bin/mpicc")
+MPICXX = "/appl/soft/spack/core/v2026_03/aarch64/g14cu129_eg/install_dir/neoverse_v2/gcc-14.3.0/openmpi-5.0.10-hrdnxd/bin/mpicxx"
+MPICC = "/appl/soft/spack/core/v2026_03/aarch64/g14cu129_eg/install_dir/neoverse_v2/gcc-14.3.0/openmpi-5.0.10-hrdnxd/bin/mpicc"
 
-SRUN_ACCOUNT = os.environ.get("EVAL_HARNESS_SRUN_ACCOUNT", "dac")
+SRUN_ACCOUNT = os.environ.get("ACCOUNT")
 SRUN_CPU_PARTITION = "small"      # x86_64 nodes -- NOT usable for this harness's
                                    # binaries: nvc/g++/mpicc all target aarch64
                                    # (the login node's arch), and this cluster's
@@ -65,6 +69,9 @@ def srun_run(cmd, cwd=None, timeout=180, env=None, gpu=False, ngpus=1, ntasks=1,
     still follow the run_roihu.sh convention. `timeout` is the Python-side
     subprocess wait; `slurm_time` is the Slurm `--time` budget and should
     be >= timeout."""
+    if not SRUN_ACCOUNT:
+        raise BuildError("ACCOUNT is not set -- export it to "
+                          "your Slurm account before running the harness.")
     prefix = ["srun", f"--account={SRUN_ACCOUNT}", f"--cpus-per-task={SRUN_CPUS_PER_TASK}"]
     if gpu:
         prefix += [f"--partition={SRUN_GPU_PARTITION}", f"--gres=gpu:gh200:{ngpus}"]

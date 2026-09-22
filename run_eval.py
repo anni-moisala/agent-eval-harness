@@ -217,12 +217,21 @@ def self_test():
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--self-test", action="store_true")
+    p.add_argument("--repo-root", default=lib.REPO_ROOT,
+                    help="clone of the original training repo (with solutions), "
+                         "only needed for --self-test or a solution|stub grade "
+                         f"(default: {lib.REPO_ROOT})")
     p.add_argument("exercise", nargs="?",
                     help="exercise id, or a repo root directory to sweep every "
                          "exercise against")
     p.add_argument("variant", nargs="?",
                     help="'solution', 'stub', or a path to a candidate directory")
     args = p.parse_args()
+    lib.REPO_ROOT = args.repo_root
+
+    if not lib.SRUN_ACCOUNT:
+        p.error("ACCOUNT is not set -- export it to your "
+                 "Slurm account before running the harness.")
 
     if args.self_test:
         sys.exit(0 if self_test() else 1)
