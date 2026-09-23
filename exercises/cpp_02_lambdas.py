@@ -36,7 +36,9 @@ def grade(results, workdir):
     a_detail = f"result={value!r} (tolerance 1e-9)"
 
     src = lib.read(os.path.join(workdir, "dot-product.cpp"))
-    lambda_count = lib.grep_count(src, r'\[[=&][^\]]*\]\s*\(')
+    # Any capture list, not just [=...]/[&...] -- naming captured variables
+    # explicitly (e.g. `[x, y](...)`) is equally valid and idiomatic.
+    lambda_count = lib.grep_count(src, r'\[[^\]]*\]\s*\(')
     b_ok = lambda_count >= 2
     b_detail = f"lambda expressions found={lambda_count} (need >=2: init + reduction)"
 
