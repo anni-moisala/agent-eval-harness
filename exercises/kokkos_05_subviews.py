@@ -1,4 +1,9 @@
-"""kokkos/exercises/05-subviews -- boundary subviews of a 2D View, exact integer result."""
+"""kokkos/exercises/05-subviews -- boundary subviews of a 2D View, exact integer result.
+
+The README specifies the exact per-boundary constant (top=-1, bottom=-2,
+left=-5, right=-6) and that each printed sum excludes its two corner
+elements (shared with an adjacent boundary), so these are the only sums a
+correct implementation can produce -- not an arbitrary reference choice."""
 
 import os
 import lib
