@@ -67,11 +67,19 @@ def grade(results, workdir):
                     f"y(Output)={y_final_vals} (expect {_EXPECTED_Y_FINAL}), tol 5e-4")
 
     src = lib.read(os.path.join(workdir, "axpy.c"))
-    target_data_count = lib.grep_count(src, r'#pragma\s+omp\s+target\s+data')
+    # Task 2 explicitly asks to *replace* the structured `target data` region
+    # with the unstructured `enter data`/`exit data` pair -- the reference
+    # solution ships both (axpy.c, axpy-unstructured.c) as equally valid, so
+    # either form should satisfy this check.
+    structured_count = lib.grep_count(src, r'#pragma\s+omp\s+target\s+data')
+    enter_count = lib.grep_count(src, r'#pragma\s+omp\s+target\s+enter\s+data')
+    exit_count = lib.grep_count(src, r'#pragma\s+omp\s+target\s+exit\s+data')
+    has_data_region = structured_count >= 1 or (enter_count >= 1 and exit_count >= 1)
     target_teams_count = lib.grep_count(src, r'#pragma\s+omp\s+target\s+teams\s+distribute\s+parallel\s+for')
     target_update_count = lib.grep_count(src, r'#pragma\s+omp\s+target\s+update')
-    b_ok = target_data_count >= 1 and target_teams_count >= 2 and target_update_count >= 1
-    b_detail = (f"target data={target_data_count} (need >=1), "
+    b_ok = has_data_region and target_teams_count >= 2 and target_update_count >= 1
+    b_detail = (f"data region: structured `target data`={structured_count}, "
+                f"unstructured `enter/exit data`={enter_count}/{exit_count} (need one of these), "
                 f"target teams distribute parallel for={target_teams_count} (need >=2: init+axpy), "
                 f"target update={target_update_count} (need >=1)")
 
