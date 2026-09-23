@@ -51,7 +51,7 @@ SRUN_CPU_PARTITION = "small"      # x86_64 nodes -- NOT usable for this harness'
 SRUN_GPU_PARTITION = os.environ.get("EVAL_HARNESS_SRUN_GPU_PARTITION", "gputest")
                                 # fast dedicated test nodes -- see note in srun_run
 SRUN_CPUS_PER_TASK = 4            # matches run_roihu.sh's --cpus-per-task=4
-SRUN_DEFAULT_SLURM_TIME = "00:10:00"  # matches run_roihu.sh's --time=00:10:00
+SRUN_DEFAULT_SLURM_TIME = "00:05:00"  
 
 
 class BuildError(Exception):
